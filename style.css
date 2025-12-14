@@ -51,15 +51,17 @@ body.dashboard-body {
 }
 
 .logo-placeholder {
-    width: 250px;
-    height: 250px;
-    background-color: #D9D9D9;
-    border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 1.5rem;
-    color: #333;
+  width: 300px; /* Atur lebar */
+  height: 300px; /* Atur tinggi */
+  border-radius: 50%; /* Membuat lingkaran */
+  overflow: hidden; /* Menyembunyikan bagian gambar yang keluar dari lingkaran */
+  border: 2px solid #ccc; /* Opsional: Menambahkan border */
+}
+
+.logo-placeholder img {
+  width: 100%; /* Gambar mengikuti ukuran div */
+  height: 100%;
+  object-fit: cover; /* Menyesuaikan gambar ke dalam div */
 }
 
 .form-section {
