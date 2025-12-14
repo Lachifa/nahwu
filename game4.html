@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Mini Games Nahwu Shorof</title>
+<style>
+body { font-family: Arial; padding: 20px; }
+.game { margin-bottom: 50px; padding: 20px; border: 2px solid #ccc; border-radius: 10px; }
+button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+.card { width: 90px; height: 90px; background: #eef; display: inline-flex; align-items: center; justify-content: center; margin: 5px; font-size: 20px; cursor: pointer; border-radius: 8px; }
+.hide { background: #aac; color: transparent; }
+</style>
+</head>
+<body>
+<h1>Mini Games</h1>
+
+
+<div class="game" id="shooter">
+<h2>Fi'il Shooter</h2>
+<p>Temukan kategori yang benar!</p>
+<p id="wordDisplay">---</p>
+<button onclick="shootAnswer('madhi')">Madhi</button>
+<button onclick="shootAnswer('mudhari')">Mudhari</button>
+<button onclick="shootAnswer('amr')">Amr</button>
+<p id="shootResult"></p>
+</div>
+
+
+<div class="game" id="memory">
+<h2>Memory Card Nahwu</h2>
+<div id="memoryBoard"></div>
+<p id="memoryStatus"></p>
+</div>
+
+
+<div style="text-align: center;">
+    <button onclick="location.href= 'dashboard.html'" style="margin:6px; padding:10px 20px; background:#8e80c8; color:white; border:none; border-radius:10px; cursor:pointer; font-size:16px;">Kembali ke Dashboard</button>
+</div>
+
+<script>
+
+//fiíl shooter
+const words = [
+  {text:'كتبَ', type:'madhi'},
+  {text:'يكتبُ', type:'mudhari'},
+  {text:'اكتبْ', type:'amr'},
+  {text:'قرأَ', type:'madhi'},
+  {text:'يذهبُ', type:'mudhari'},
+];
+let current = null;
+function newWord(){ current = words[Math.floor(Math.random()*words.length)]; document.getElementById("wordDisplay").innerText = current.text; }
+function shootAnswer(t){
+  document.getElementById("shootResult").innerText = (t===current.type?"Benar!":"Salah!");
+  newWord();
+}
+newWord();
+
+//Memory card
+let items = ["ذهبَ","Madhi","يذهبُ","Mudhari"]; items = [...items,...items];
+items.sort(()=>Math.random()-0.5);
+let first=null, lock=false;
+const board = document.getElementById("memoryBoard");
+items.forEach((v,i)=>{
+  const c=document.createElement("div"); c.className="card hide"; c.dataset.value=v; c.innerText=v;
+  c.onclick=function(){ if(lock||!c.classList.contains("hide"))return; c.classList.remove("hide"); if(!first){ first=c; } else { lock=true; setTimeout(()=>{
+    if(first.dataset.value===c.dataset.value){} else { first.classList.add("hide"); c.classList.add("hide"); }
+    first=null; lock=false;
+  },700);} };
+  board.appendChild(c);
+});
+</script>
+</body>
+</html>

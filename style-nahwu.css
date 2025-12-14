@@ -1,0 +1,103 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: sans-serif;
+}
+
+body { margin:0; background:#e6f2f7; font-family: sans-serif;}
+
+header {
+    display:flex; 
+    align-items:center;
+    background: #98BCC8; 
+    height: 60px;
+    top: 0;
+    z-index: 100;
+}
+
+.container {
+    display:flex;
+    height: calc(100vh - 70px);
+}
+
+.sidebar {
+    width:30%;
+    background:#f6fdff;
+    padding:20px;
+    color:rgb(53, 53, 53);
+    overflow-y:auto;
+}
+
+.materi {
+    margin-bottom: 25px;
+    margin-top: 25px;
+}
+
+.materi-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.materi-header h2 {
+    font-size: 1.3rem;
+}
+
+.toggle {
+    background: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.sub-list {
+    background: rgba(153, 182, 165, 0.15);
+    padding: 15px;
+    margin-top: 15px;
+    border-radius: 6px;
+}
+
+.sub-item { cursor:pointer; margin:10px 0; }
+
+.content {
+    flex:1;
+    background:#eaf6ff;
+    border-left:3px solid white;
+    padding:20px;
+    display:flex;
+    flex-direction:column;
+}
+
+.sub-title {
+    background:#c3d7e7;
+    color:rgb(60, 60, 60);
+    padding:10px;
+    margin-bottom:15px;
+}
+
+.pdf-scroll {
+    flex:1;
+    overflow-y:auto;
+    padding:10px;
+    background:#e1ecf1;
+}
+
+/* --- RESPONSIVE --- */
+@media (max-width: 768px) {
+    .container {
+        flex-direction: row;
+    }
+
+    .sidebar {
+        width: 150px; 
+    }
+
+    .content {
+        flex: 1;
+    }
+}
+
+
+

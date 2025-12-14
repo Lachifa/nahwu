@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Quiz Nahwu Shorof</title>
+
+<style>
+body { font-family: Arial; background:#e6f2f7; margin:0; padding:0; }
+.container { max-width:700px; margin:50px auto; background:white; padding:30px; border-radius:15px; box-shadow:0 0 10px rgba(0,0,0,0.1); }
+h2 { margin-top:0; }
+.btn { display:block; width:100%; padding:12px; margin:10px 0; background:#8bb5cc; color:white; border:none; border-radius:10px; cursor:pointer; font-size:18px; }
+.btn:hover { background:#739ab3; }
+.message { font-size:20px; font-weight:bold; text-align:center; margin-top:20px; }
+.correct { color:green; }
+.wrong { color:red; }
+.top-btns { display:flex; justify-content:space-between; margin-bottom:20px; }
+.small-btn { padding:10px 15px; background:#6a90aa; color:white; border:none; border-radius:8px; cursor:pointer; }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+    <div class="top-btns">
+        <button class="small-btn" onclick="goDashboard()">← Dashboard</button>
+        <button class="small-btn" onclick="skipQuestion()">Skip Soal →</button>
+    </div>
+
+    <h2 id="questionText">Memuat soal...</h2>
+
+    <div id="options"></div>
+
+    <div id="message" class="message"></div>
+</div>
+
+<script>
+// ===========================
+// DATA SOAL
+// ===========================
+const quizData = [
+    {
+        q: "Apa arti lafazh 'كلام' menurut ilmu Nahwu?",
+        options: [
+            "Ucapan yang bermakna saja",
+            "Lafazh yang tersusun dan bermakna lengkap",
+            "Kata yang hanya terdiri dari huruf hijaiyah",
+            "Gabungan dua huruf atau lebih"
+        ],
+        answer: 1
+    },
+    {
+        q: "Contoh lafazh berikut yang termasuk murakkab adalah...",
+        options: ["كتاب", "مجلس", "الله أكبر", "قلم"],
+        answer: 2
+    },
+    {
+        q: "Yang dimaksud lafazh adalah...",
+        options: [
+            "Suara ayam dan mesin",
+            "Ucapan yang mengandung huruf hijaiyah",
+            "Gabungan huruf tanpa makna",
+            "Tulisan Arab tanpa suara"
+        ],
+        answer: 1
+    }
+];
+
+let index = 0;
+let score = 0; // skor benar
+
+// ===========================
+// TAMPILKAN SOAL
+// ===========================
+function loadQuestion() {
+    const q = quizData[index];
+    document.getElementById("questionText").innerText = q.q;
+
+    const optBox = document.getElementById("options");
+    optBox.innerHTML = "";
+
+    q.options.forEach((opt, i) => {
+        const btn = document.createElement("button");
+        btn.className = "btn";
+        btn.innerText = opt;
+        btn.onclick = () => checkAnswer(i);
+        optBox.appendChild(btn);
+    });
+
+    document.getElementById("message").innerText = "";
+}
+
+// ===========================
+// CHECK ANSWER
+// ===========================
+function checkAnswer(selected) {
+    const correct = quizData[index].answer;
+    const msg = document.getElementById("message");
+
+    if (selected === correct) {
+        score++; // tambah skor
+        msg.innerText = "Benar!";
+        msg.className = "message correct";
+
+        setTimeout(() => {
+            nextQuestion();
+        }, 900);
+    } else {
+        msg.innerText = "Salah! Coba lagi.";
+        msg.className = "message wrong";
+    }
+}
+
+// ===========================
+// NEXT QUESTION
+// ===========================
+function nextQuestion() {
+    index++;
+    if (index >= quizData.length) {
+        document.getElementById("questionText").innerText = "Quiz selesai!";
+        document.getElementById("options").innerHTML = "";
+        document.getElementById("message").innerHTML =
+            `🎉 Kamu menjawab benar <b>${score}</b> dari <b>${quizData.length}</b> soal!`;
+        return;
+    }
+    loadQuestion();
+}
+
+// ===========================
+// SKIP SOAL
+// ===========================
+function skipQuestion() {
+    nextQuestion();
+}
+
+// ===========================
+// KEMBALI KE DASHBOARD
+// ===========================
+function goDashboard() {
+    window.location.href = "dashboard.html";
+}
+
+// ===========================
+// MULAI QUIZ
+// ===========================
+loadQuestion();
+</script>
+
+</body>
+</html>

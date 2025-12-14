@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Pembelajaran Nahwu Sorof</title>
+    
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="login-body">
+
+    <div class="main-container">
+
+        <div class="logo-section">
+            <div class="logo-placeholder">
+                Logo
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h2>Login</h2>
+            
+            <form id="loginForm" class="form-element-wrapper">
+                
+                <input type="text" id="usernameInput" class="login-input" placeholder="username" required>
+                
+                <input type="password" id="passwordInput" class="login-input" placeholder="Pass" required>
+                
+                <button type="submit" class="login-button">Login</button>
+            </form>
+
+            <p style="margin-top: 15px; color: #555; text-align: center;">
+                Belum punya akun? <a href="register.html" style="color: #444; font-weight: bold;">Daftar di sini</a>
+            </p>
+
+            <p id="errorMsg" style="color: red; text-align: center; margin-top: 10px; display: none;">
+                Username atau Password salah!
+            </p>
+        </div>
+
+    </div>
+
+    <script>
+        const loginForm = document.getElementById('loginForm');
+        const errorMsg = document.getElementById('errorMsg');
+
+        loginForm.addEventListener('submit', function(event) {
+            // Cegah form langsung pindah halaman (refresh)
+            event.preventDefault(); 
+
+            // 1. Ambil apa yang diketik user
+            const inputUser = document.getElementById('usernameInput').value;
+            const inputPass = document.getElementById('passwordInput').value;
+
+            // 2. Ambil "Kunci Jawaban" dari memori browser (localStorage)
+            // (Data ini nanti didapat dari halaman Register)
+            const storedUser = localStorage.getItem('db_username');
+            const storedPass = localStorage.getItem('db_password');
+
+            // 3. CEK: Apakah input sama dengan data tersimpan?
+            if (inputUser === storedUser && inputPass === storedPass) {
+                
+                // KALAU BENAR:
+                // Simpan nama sesi biar dashboard tahu siapa yang login
+                localStorage.setItem('namaUser', inputUser);
+                
+                // Masuk ke dashboard
+                window.location.href = 'dashboard.html';
+                
+            } else {
+                // KALAU SALAH:
+                errorMsg.style.display = 'block';
+                errorMsg.innerText = "Username/Password salah atau belum daftar!";
+            }
+        });
+    </script>
+
+</body>
+</html>

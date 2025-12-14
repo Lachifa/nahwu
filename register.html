@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daftar Akun - Nahwu Sorof</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="login-body">
+
+    <div class="main-container">
+        <div class="logo-section">
+            <div class="logo-placeholder">Logo</div>
+        </div>
+
+        <div class="form-section">
+            <h2>Daftar Akun</h2>
+            
+            <form id="registerForm" class="form-element-wrapper">
+                <input type="text" id="regUsername" class="login-input" placeholder="Buat Username" required>
+                <input type="password" id="regPassword" class="login-input" placeholder="Buat Password" required>
+                
+                <button type="submit" class="login-button">Daftar</button>
+            </form>
+
+            <p style="margin-top: 20px; color: #333;">
+                Sudah punya akun? <a href="index.html" style="color: blue;">Login di sini</a>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        const registerForm = document.getElementById('registerForm');
+
+        registerForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            // 1. Ambil data yang diketik
+            const username = document.getElementById('regUsername').value;
+            const password = document.getElementById('regPassword').value;
+
+            // 2. SIMPAN KE DATABASE BROWSER (localStorage)
+            // Kita namakan kuncinya 'db_username' dan 'db_password'
+            localStorage.setItem('db_username', username);
+            localStorage.setItem('db_password', password);
+            
+            // 3. Set progress awal jadi 0 (untuk persiapan nanti)
+            localStorage.setItem('db_progress', 0);
+
+            alert("Akun berhasil dibuat! Silakan Login.");
+            
+            // 4. Lempar ke halaman login
+            window.location.href = 'index.html';
+        });
+    </script>
+
+</body>
+</html>

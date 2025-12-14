@@ -1,0 +1,322 @@
+/* =========================================
+   1. GLOBAL RESET
+   ========================================= */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* =========================================
+   2. BODY SETTINGS (PENTING!)
+   ========================================= */
+
+/* A. Body khusus Halaman LOGIN (Tengah Layar) */
+body.login-body {
+    background-color: #222222;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+/* B. Body khusus Halaman DASHBOARD (Scroll Biasa) */
+body.dashboard-body {
+    background-color: #ffffff;
+    display: block; /* Normal flow dari atas ke bawah */
+    min-height: 100vh;
+    overflow-x: hidden; /* Mencegah scroll samping saat sidebar geser */
+}
+
+
+/* =========================================
+   3. STYLE HALAMAN LOGIN (Old Code)
+   ========================================= */
+.main-container {
+    width: 100%;
+    max-width: 1200px; 
+    padding: 20px;
+    display: flex;
+    justify-content: space-evenly; 
+    align-items: center;
+    flex-wrap: wrap; 
+    gap: 50px; 
+}
+
+.logo-section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.logo-placeholder {
+    width: 250px;
+    height: 250px;
+    background-color: #D9D9D9;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.5rem;
+    color: #333;
+}
+
+.form-section {
+    background-color: #D9D9D9;
+    padding: 50px 40px;
+    width: 400px; 
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border-radius: 8px;
+}
+
+.form-section h2 {
+    margin-bottom: 30px;
+    font-weight: normal;
+    font-size: 2rem;
+    color: #333;
+}
+
+.form-element-wrapper { width: 100%; }
+
+.login-input {
+    width: 100%;
+    padding: 15px;
+    margin-bottom: 20px;
+    background-color: #7F7F7F;
+    border: none;
+    border-radius: 4px;
+    color: white;
+    font-size: 1.1rem;
+    text-align: center;
+}
+
+.login-input::placeholder { color: #e0e0e0; }
+.login-input:focus { outline: 2px solid #555; }
+
+.login-button {
+    width: 150px;
+    padding: 12px;
+    margin: 10px auto 0 auto;
+    display: block;
+    background-color: #999999;
+    border: none;
+    border-radius: 4px;
+    color: white;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.login-button:hover { background-color: #777777; }
+
+
+/* =========================================
+   4. STYLE HALAMAN DASHBOARD 
+   ========================================= */
+
+/* --- NAVBAR --- */
+.navbar {
+    background-color: #98BCC8; /* Biru muda */
+    height: 60px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.profile-circle-small {
+  width: 40px; /* Atur lebar */
+  height: 40px; /* Atur tinggi */
+  border-radius: 50%; /* Membuat lingkaran */
+  overflow: hidden; /* Menyembunyikan bagian gambar yang keluar dari lingkaran */
+  border: 2px solid #ccc; /* Opsional: Menambahkan border */
+}
+
+.profile-circle-small img {
+  width: 100%; /* Gambar mengikuti ukuran div */
+  height: 100%;
+  object-fit: cover; /* Menyesuaikan gambar ke dalam div */
+}
+
+/* --- SIDEBAR (SLIDING MENU) --- */
+.sidebar {
+    height: 100%;
+    width: 250px;
+    position: fixed;
+    top: 0;
+    left: -250px; /* Sembunyi di kiri layar */
+    background-color: #6C7A80; /* Abu tua */
+    transition: 0.3s; /* Animasi geser */
+    padding-top: 60px;
+    z-index: 200;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Class ini aktif kalau diklik */
+.sidebar.active {
+    left: 0; 
+}
+
+.sidebar-header {
+    text-align: center;
+    color: white;
+    margin-bottom: 50px;
+}
+
+.profile-circle-large {
+  width: 50px; /* Atur lebar */
+  height: 50px; /* Atur tinggi */
+  border-radius: 50%; /* Membuat lingkaran */
+  overflow: hidden; /* Menyembunyikan bagian gambar yang keluar dari lingkaran */
+  border: 2px; /* Opsional: Menambahkan border */
+}
+
+.profile-circle-large img {
+  width: 100%; /* Gambar mengikuti ukuran div */
+  height: 100%;
+  object-fit: cover; /* Menyesuaikan gambar ke dalam div */
+}
+
+.logout-btn {
+    width: 80%;
+    padding: 10px;
+    background-color: #CDE4EB;
+    text-align: center;
+    text-decoration: none;
+    color: black;
+    border-radius: 20px;
+    font-weight: bold;
+}
+
+/* Overlay Hitam Transparan */
+#overlay {
+    position: fixed;
+    display: none;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    background-color: rgba(0,0,0,0.5);
+    z-index: 150;
+}
+#overlay.active { display: block; }
+
+/* --- KONTEN UTAMA --- */
+.dashboard-content {
+    padding: 20px;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.page-title {
+    text-align: center;
+    margin: 30px 0;
+    font-weight: normal;
+    font-size: 1.8rem;
+    text-transform: capitalize;
+}
+
+.cards-container {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+/* --- KARTU (COMPONENT) --- */
+.card {
+    background-color: #EEF2F5;
+    border-radius: 15px;
+    padding: 20px;
+    width: 48%;
+    min-width: 400px;
+}
+
+/* Kartu User (Kiri) */
+.user-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.card-header-row {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+.profile-circle-medium {
+  width: 60px; /* Atur lebar */
+  height: 60px; /* Atur tinggi */
+  border-radius: 50%; /* Membuat lingkaran */
+  overflow: hidden; /* Menyembunyikan bagian gambar yang keluar dari lingkaran */
+  border: 2px; /* Opsional: Menambahkan border */
+}
+
+.profile-circle-medium img {
+  width: 100%; /* Gambar mengikuti ukuran div */
+  height: 100%;
+  object-fit: cover; /* Menyesuaikan gambar ke dalam div */
+}
+
+.button-row {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+    gap: 10px;
+}
+
+.action-btn {
+    flex: 1;
+    background-color: #8FB6D0;
+    border: none;
+    padding: 15px 0;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+/* --- PROGRESS BAR --- */
+.progress-container {
+    background-color: #8FA2AD;
+    border-radius: 10px;
+    height: 15px;
+    flex-grow: 1;
+    overflow: hidden;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.small-bar { width: 60%; } /* Variasi lebar */
+
+.progress-bar {
+    background-color: #BCCDD5;
+    height: 100%;
+}
+
+
+/* =========================================
+   5. RESPONSIVE GLOBAL (HP)
+   ========================================= */
+@media screen and (max-width: 768px) {
+    /* Login Fixes */
+    .main-container {
+        flex-direction: column; 
+        gap: 40px;
+        min-height: 100vh;
+        justify-content: center;
+    }
+    .logo-placeholder { width: 150px; height: 150px; }
+    .form-section { width: 100%; max-width: 350px; }
+
+    /* Dashboard Fixes */
+    .card { width: 100%; } /* Kartu jadi tumpuk bawah di HP */
+}

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nahwu</title>
+    <link rel="stylesheet" href="style-nahwu.css">
+    <link rel="stylesheet" href="pdfjs/pdf_viewer.css">
+</head>
+<body>
+
+<header>
+    <button onclick="location.href='materi.html'" 
+        style="margin:15px; padding:10px 20px; background:#6a90aa; color:white; border:none; border-radius:10px; cursor:pointer; font-size:16px;">
+        ← Kembali
+    </button>
+</header>
+
+<div class="container">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+
+        <!-- Materi 1-->
+        <div class="materi">
+            <div class="materi-header">
+                <h2>BAB 1</h2>
+                <button class="toggle">▲</button>
+            </div>
+        <!-- sub materi-->
+            <div class="sub-list">
+                <div class="sub-item active" data-id="sorof-1-1" data-pdf="pdf2/1.1.pdf" onclick="toggleStatus(this)">
+                    <span class="status">✖</span> 1.1 Pembukaan
+                </div>
+                <div class="sub-item" data-id="sorof-1-2" data-pdf="pdf2/1.2.pdf" onclick="toggleStatus(this)">
+                    <span class="status">✖</span> 1.2 Pengertian
+                </div>
+                <div class="sub-item" data-id="sorof-1-3" data-pdf="pdf2/1.3.pdf" onclick="toggleStatus(this)">
+                    <span class="status">✖</span> 1.3 Tanda
+                </div>
+                <div class="sub-item" data-id="sorof-1-4" data-pdf="pdf2/1.4.pdf" onclick="toggleStatus(this)">
+                    <span class="status">✖</span> 1.4 Fungsi
+                </div>
+                <div class="sub-item" data-id="sorof-1-5" data-pdf="pdf2/1.5.pdf" onclick="toggleStatus(this)">
+                    <span class="status">✖</span> 1.5 Bentuk Perubahan
+                </div>
+        </div>
+        <hr>
+            
+        <!-- sub materi-->
+        <!-- disembunyikan dulu -->
+            <div class="sub-list" style="display: none;">
+                <div class="sub-item" data-pdf="pdf/2.1.pdf" onclick="toggleStatus(this)">
+                    <span class="status">✖</span> 2.1 Pengertian I'rab
+                </div>
+                <div class="sub-item" data-pdf="pdf/2.2.pdf" onclick="toggleStatus(this)">
+                    <span class="status">✖</span> 2.2 I'rab Isim
+            </div>
+        </div>
+        <hr>
+
+    </aside>
+
+    <!-- Main -->
+    <main class="content">
+        <div id="sub-title" class="sub-title">1.1 Pembukaan</div> 
+        <div id="pdf-container" class="pdf-scroll"></div>
+    </main>
+
+</div>
+
+<script type="module" src="script-nahwu.js"></script>
+</body>
+</html>

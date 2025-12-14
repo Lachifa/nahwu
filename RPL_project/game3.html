@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Simple Platformer</title>
+<style>
+    body {
+        margin: 0;
+        background: #87CEEB; /* langit */
+        overflow: hidden;
+    }
+    canvas {
+        display: block;
+        background: #b3ecff;
+        outline: 2px solid black;
+    }
+</style>
+</head>
+<body>
+
+<canvas id="gameCanvas" width="800" height="400"></canvas>
+
+<script>
+// ============================
+// 1. CANVAS SETUP
+// ============================
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+
+// ============================
+// 2. GAME OBJECTS
+// ============================
+const player = {
+    x: 50,
+    y: 300,
+    width: 40,
+    height: 40,
+    speed: 5,
+    velocityY: 0,
+    jumping: false
+};
+
+const gravity = 0.6;
+const ground = 340;
+
+let cameraX = 0;
+
+// Platform list
+const platforms = [
+    { x: 200, y: 260, width: 120, height: 20 },
+    { x: 450, y: 200, width: 150, height: 20 },
+    { x: 800, y: 300, width: 100, height: 20 }
+];
+
+// ============================
+// 3. INPUT HANDLER
+// ============================
+let keys = {};
+
+document.addEventListener("keydown", e => keys[e.key] = true);
+document.addEventListener("keyup", e => keys[e.key] = false);
+
+// ============================
+// 4. UPDATE GAME LOGIC
+// ============================
+function update() {
+
+    // ---- Move Left or Right ----
+    if (keys["ArrowLeft"]) player.x -= player.speed;
+    if (keys["ArrowRight"]) player.x += player.speed;
+
+    // ---- Jump ----
+    if ((keys["ArrowUp"] || keys[" "]) && !player.jumping) {
+        player.velocityY = -12;
+        player.jumping = true;
+    }
+
+    // ---- Apply Gravity ----
+    player.y += player.velocityY;
+    player.velocityY += gravity;
+
+    // ---- Platform Collision ----
+    let onPlatform = false;
+
+    platforms.forEach(p => {
+        if (
+            player.x + player.width > p.x &&
+            player.x < p.x + p.width &&
+            player.y + player.height >= p.y &&
+            player.y + player.height <= p.y + p.height &&
+            player.velocityY >= 0
+        ) {
+            player.y = p.y - player.height;
+            player.velocityY = 0;
+            player.jumping = false;
+            onPlatform = true;
+        }
+    });
+
+    // ---- Ground Collision ----
+    if (!onPlatform) {
+        if (player.y + player.height >= ground) {
+            player.y = ground - player.height;
+            player.velocityY = 0;
+            player.jumping = false;
+        }
+    }
+
+    // ---- Camera Follow Player ----
+    cameraX = player.x - canvas.width / 2;
+}
+
+// ============================
+// 5. DRAW ALL OBJECTS
+// ============================
+function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // ---- Ground ----
+    ctx.fillStyle = "#228B22";
+    ctx.fillRect(0 - cameraX, ground, 2000, 60);
+
+    // ---- Platforms ----
+    ctx.fillStyle = "#654321";
+    platforms.forEach(p => {
+        ctx.fillRect(p.x - cameraX, p.y, p.width, p.height);
+    });
+
+    // ---- Player ----
+    ctx.fillStyle = "#ff0000";
+    ctx.fillRect(player.x - cameraX, player.y, player.width, player.height);
+}
+
+// ============================
+// 6. MAIN GAME LOOP
+// ============================
+function gameLoop() {
+    update();
+    draw();
+    requestAnimationFrame(gameLoop);
+}
+
+gameLoop();
+</script>
+
+</body>
+</html>

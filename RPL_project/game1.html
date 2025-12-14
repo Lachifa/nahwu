@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>Game Drag & Drop Fi'il</title>
+<style>
+    body {
+        font-family: sans-serif;
+        background: #f7f7f7;
+        padding: 20px;
+    }
+    h1 {
+        text-align: center;
+    }
+
+    .container {
+        display: flex;
+        gap: 30px;
+        justify-content: center;
+        margin-top: 30px;
+    }
+
+    .word-bank, .targets {
+        background: white;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    .word {
+        background: #e0f0ff;
+        padding: 8px 14px;
+        border-radius: 6px;
+        margin: 8px 0;
+        width: fit-content;
+        cursor: grab;
+        font-size: 20px;
+    }
+
+    .target-box {
+        width: 250px;
+        height: 150px;
+        border: 2px dashed #999;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        padding: 10px;
+    }
+
+    .target-title {
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+</style>
+</head>
+<body>
+
+<h1>🎮 لعبة: صنّف الكلمات حسب نوع الفعل</h1>
+
+<div class="container">
+    
+    <!-- Word choices -->
+    <div class="word-bank">
+        <h3>الكلمات</h3>
+        <div id="words">
+            <div class="word" draggable="true" id="qod">قَدْ ذَهَبَ</div>
+            <div class="word" draggable="true" id="madhii">أَكَلَ</div>
+            <div class="word" draggable="true" id="sukun">نْتَصَرَ</div>
+            <div class="word" draggable="true" id="mudhori">يَذْهَبُ</div>
+        </div>
+    </div>
+
+    <!-- Target boxes -->
+    <div class="targets">
+        <div class="target-box" data-accept="qod">
+            <div class="target-title">كلمة تبدأ بـ "قد"</div>
+        </div>
+
+        <div class="target-box" data-accept="mudhori">
+            <div class="target-title">فعل مُضارع (يـ، تـ، نـ، أ)</div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Audio -->
+<audio id="correctSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_5997ad3c8d.mp3?filename=correct-2-46134.mp3"></audio>
+<audio id="wrongSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_70a1aaa37e.mp3?filename=click-error-23591.mp3"></audio>
+
+<script>
+    const words = document.querySelectorAll(".word");
+    const targets = document.querySelectorAll(".target-box");
+
+    words.forEach(word => {
+        word.addEventListener("dragstart", e => {
+            e.dataTransfer.setData("text", e.target.id);
+        });
+    });
+
+    targets.forEach(box => {
+        box.addEventListener("dragover", e => {
+            e.preventDefault();
+        });
+
+        box.addEventListener("drop", e => {
+            e.preventDefault();
+            const wordId = e.dataTransfer.getData("text");
+            const word = document.getElementById(wordId);
+
+            if (box.dataset.accept === wordId) {
+                box.appendChild(word);
+                document.getElementById("correctSound").play();
+                word.style.cursor = "default";
+                word.setAttribute("draggable", false);
+            } else {
+                document.getElementById("wrongSound").play();
+            }
+        });
+    });
+</script>
+
+</body>
+</html>
