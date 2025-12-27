@@ -1,6 +1,12 @@
+/* =========================
+   PDFJS IMPORT
+========================= */
 import * as pdfjsLib from "./pdfjs/pdf.mjs";
 pdfjsLib.GlobalWorkerOptions.workerSrc = "./pdfjs/pdf.worker.mjs";
 
+/* =========================
+   GLOBAL
+========================= */
 const container = document.getElementById("pdf-container");
 let finished = false;
 
@@ -14,7 +20,7 @@ const quizData = {
         passPercent: 70,
         questions: [
             {
-                question: "Apa pengertian kalam menurut nahwu?",
+                question: "Apa pengertian kalam menurut ilmu nahwu?",
                 options: [
                     "Lafazh yang tersusun dan bermakna lengkap",
                     "Huruf hijaiyah",
@@ -29,29 +35,24 @@ const quizData = {
                 answer: 2
             },
             {
-                question: "Kalam harus bermakna, maksudnya?",
-                options: [
-                    "Bisa dipahami",
-                    "Berbahasa Arab",
-                    "Mengandung fi'il",
-                    "Mengandung huruf hijaiyah"
-                ],
-                answer: 0
-            },
-            {
                 question: "Apakah satu kata bisa disebut kalam?",
                 options: ["Bisa", "Tidak bisa"],
                 answer: 1
             },
             {
                 question: "Contoh kalam yang benar adalah?",
-                options: [
-                    "قلم",
-                    "كتبَ زيدٌ",
-                    "في",
-                    "من"
-                ],
+                options: ["قلم", "كتبَ زيدٌ", "في", "من"],
                 answer: 1
+            },
+            {
+                question: "Kalam harus bermakna, maksudnya?",
+                options: [
+                    "Bisa dipahami",
+                    "Berbahasa Arab",
+                    "Ada harakat",
+                    "Ditulis Arab"
+                ],
+                answer: 0
             },
             {
                 question: "Kalam terdiri dari?",
@@ -77,13 +78,21 @@ const quizData = {
     }
 };
 
-let activeQuizQuestions = {};
+/* =========================
+   QUIZ STATE
+========================= */
+let quizState = {
+    quizId: null,
+    questions: [],
+    currentIndex: 0,
+    answers: []
+};
 
 /* =========================
    UTIL
 ========================= */
-function shuffleArray(array) {
-    return array
+function shuffleArray(arr) {
+    return arr
         .map(v => ({ v, r: Math.random() }))
         .sort((a, b) => a.r - b.r)
         .map(o => o.v);
@@ -106,6 +115,7 @@ async function loadPDF(url) {
 
         const canvas = document.createElement("canvas");
         const ctx = canvas.getContext("2d");
+
         canvas.width = viewport.width;
         canvas.height = viewport.height;
 
@@ -141,84 +151,131 @@ function checkScroll() {
 }
 
 /* =========================
-   QUIZ RENDER
+   START QUIZ
 ========================= */
-function renderQuiz(quizId) {
+function startQuiz(quizId) {
     const quiz = quizData[quizId];
-    if (!quiz) return;
 
-    const selected = shuffleArray(quiz.questions).slice(0, quiz.totalQuestions);
-    activeQuizQuestions[quizId] = selected;
+    const selected = shuffleArray([...quiz.questions])
+        .slice(0, quiz.totalQuestions);
 
-    container.innerHTML = `
-        <h2>${quiz.title}</h2>
-        <p><b>Syarat lulus:</b> ${quiz.passPercent}%</p>
-        <form id="quiz-form">
-            ${selected.map((q, i) => `
-                <div class="quiz-question">
-                    <p><b>${i + 1}. ${q.question}</b></p>
-                    ${q.options.map((opt, j) => `
-                        <label>
-                            <input type="radio" name="q${i}" value="${j}">
-                            ${opt}
-                        </label><br>
-                    `).join("")}
-                    <div class="feedback" id="fb-${i}"></div>
-                </div>
-                <hr>
-            `).join("")}
-            <button type="submit">Cek Jawaban</button>
-        </form>
-        <div id="quiz-result"></div>
-    `;
+    quizState = {
+        quizId,
+        questions: selected,
+        currentIndex: 0,
+        answers: new Array(selected.length).fill(null)
+    };
 
-    document.getElementById("quiz-form").addEventListener("submit", e => {
-        e.preventDefault();
-        checkQuiz(quizId);
-    });
+    renderQuizQuestion();
 }
 
 /* =========================
-   CEK QUIZ + 70%
+   RENDER 1 QUESTION
 ========================= */
-function checkQuiz(quizId) {
-    const quiz = quizData[quizId];
-    const questions = activeQuizQuestions[quizId];
-    let correct = 0;
+function renderQuizQuestion() {
+    const { questions, currentIndex, answers } = quizState;
+    const q = questions[currentIndex];
 
-    questions.forEach((q, i) => {
-        const selected = document.querySelector(`input[name="q${i}"]:checked`);
-        const feedback = document.getElementById(`fb-${i}`);
+    container.innerHTML = `
+        <div class="quiz-wrapper">
+            <div class="quiz-card">
 
-        if (!selected) {
-            feedback.textContent = "⚠️ Belum dijawab";
-            feedback.style.color = "orange";
-            return;
-        }
+                <p class="quiz-progress">
+                    Soal ${currentIndex + 1} dari ${questions.length}
+                </p>
 
-        if (parseInt(selected.value) === q.answer) {
-            feedback.textContent = "✔ Benar";
-            feedback.style.color = "green";
-            correct++;
-        } else {
-            feedback.textContent = "✖ Salah";
-            feedback.style.color = "red";
-        }
+                <h3>${q.question}</h3>
+
+                <div class="quiz-options">
+                    ${q.options.map((opt, i) => `
+                        <label class="quiz-option">
+                            <input type="radio" name="quiz"
+                                value="${i}"
+                                ${answers[currentIndex] === i ? "checked" : ""}>
+                            ${opt}
+                        </label>
+                    `).join("")}
+                </div>
+
+                <div class="quiz-nav">
+                    ${
+                        currentIndex < questions.length - 1
+                            ? `<button id="nextBtn" disabled>Next</button>`
+                            : `<button id="submitBtn" disabled>Cek Jawaban</button>`
+                    }
+                </div>
+
+            </div>
+        </div>
+    `;
+
+    setupQuizListeners();
+}
+
+/* =========================
+   QUIZ LISTENER
+========================= */
+function setupQuizListeners() {
+    const radios = document.querySelectorAll("input[name='quiz']");
+    const btn = document.getElementById("nextBtn") || document.getElementById("submitBtn");
+
+    radios.forEach(radio => {
+        radio.addEventListener("change", () => {
+            quizState.answers[quizState.currentIndex] = parseInt(radio.value);
+            btn.disabled = false;
+        });
     });
 
-    const percent = Math.round((correct / questions.length) * 100);
-    const result = document.getElementById("quiz-result");
-
-    if (percent >= quiz.passPercent) {
-        result.innerHTML = `<p style="color:green"><b>LULUS 🎉 (${percent}%)</b></p>`;
-        markQuizDone(quizId);
+    if (btn.id === "nextBtn") {
+        btn.onclick = () => {
+            quizState.currentIndex++;
+            renderQuizQuestion();
+        };
     } else {
-        result.innerHTML = `<p style="color:red"><b>Belum lulus (${percent}%)</b><br>Minimal ${quiz.passPercent}%</p>`;
+        btn.onclick = submitQuiz;
     }
 }
 
 /* =========================
-   TANDAI QUIZ SELESAI
+   SUBMIT QUIZ
+========================= */
+function submitQuiz() {
+    const quiz = quizData[quizState.quizId];
+    let correct = 0;
+
+    quizState.questions.forEach((q, i) => {
+        if (quizState.answers[i] === q.answer) correct++;
+    });
+
+    const percent = Math.round((correct / quizState.questions.length) * 100);
+
+    container.innerHTML = `
+        <div class="quiz-wrapper">
+            <div class="quiz-card">
+                <h2>Hasil Quiz</h2>
+                <p>Benar: ${correct} / ${quizState.questions.length}</p>
+                <p>Nilai: <b>${percent}%</b></p>
+
+                ${
+                    percent >= quiz.passPercent
+                        ? `<p style="color:green"><b>LULUS 🎉</b></p>`
+                        : `<p style="color:red"><b>Belum Lulus</b></p>`
+                }
+
+                <button onclick="startQuiz('${quizState.quizId}')">
+                    Ulangi Quiz
+                </button>
+            </div>
+        </div>
+    `;
+
+    if (percent >= quiz.passPercent) {
+        markQuizDone(quizState.quizId);
+    }
+}
+
+/* =========================
+   MARK QUIZ DONE
 ========================= */
 function markQuizDone(quizId) {
     const activeItem = document.querySelector(".sub-item.active");
@@ -252,8 +309,8 @@ window.toggleStatus = function(el) {
     document.querySelectorAll(".sub-item").forEach(i => i.classList.remove("active"));
     el.classList.add("active");
 
-    const statusSpan = el.querySelector(".status");
-    const title = el.textContent.replace(statusSpan.textContent, "").trim();
+    const status = el.querySelector(".status");
+    const title = el.textContent.replace(status.textContent, "").trim();
     document.getElementById("sub-title").textContent = title;
 
     container.innerHTML = "";
@@ -262,7 +319,7 @@ window.toggleStatus = function(el) {
     if (el.dataset.pdf) {
         loadPDF(el.dataset.pdf);
     } else if (el.dataset.quiz) {
-        renderQuiz(el.dataset.quiz);
+        startQuiz(el.dataset.quiz);
     }
 };
 
@@ -277,8 +334,11 @@ document.querySelectorAll(".toggle").forEach(btn => {
     });
 });
 
+/* =========================
+   INIT
+========================= */
 document.addEventListener("DOMContentLoaded", () => {
     restoreChecklist();
-    const initialPDF = document.querySelector(".sub-item.active")?.dataset.pdf;
-    if (initialPDF) loadPDF(initialPDF);
+    const initial = document.querySelector(".sub-item.active")?.dataset.pdf;
+    if (initial) loadPDF(initial);
 });
