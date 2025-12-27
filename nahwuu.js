@@ -1,27 +1,106 @@
-/*************************************************
- * PDF.js SETUP
- *************************************************/
+/* =========================
+   PDFJS IMPORT
+========================= */
 import * as pdfjsLib from "./pdfjs/pdf.mjs";
 pdfjsLib.GlobalWorkerOptions.workerSrc = "./pdfjs/pdf.worker.mjs";
 
+/* =========================
+   GLOBAL
+========================= */
 const container = document.getElementById("pdf-container");
 let finished = false;
 
-/*************************************************
- * 🔐 AKUN & LOCAL STORAGE
- *************************************************/
-function getCurrentUser() {
-    return localStorage.getItem("currentUser");
+/* =========================
+   BANK SOAL QUIZ
+========================= */
+const quizData = {
+    "quiz-1-2": {
+        title: "Quiz BAB 1 – Kalam",
+        totalQuestions: 3,
+        passPercent: 70,
+        questions: [
+            {
+                question: "Apa pengertian kalam menurut ilmu nahwu?",
+                options: [
+                    "Lafazh yang tersusun dan bermakna lengkap",
+                    "Huruf hijaiyah",
+                    "Isim dan fi'il",
+                    "Kata kerja Arab"
+                ],
+                answer: 0
+            },
+            {
+                question: "Berapa syarat kalam menurut ulama nahwu?",
+                options: ["2", "3", "4", "5"],
+                answer: 2
+            },
+            {
+                question: "Apakah satu kata bisa disebut kalam?",
+                options: ["Bisa", "Tidak bisa"],
+                answer: 1
+            },
+            {
+                question: "Contoh kalam yang benar adalah?",
+                options: ["قلم", "كتبَ زيدٌ", "في", "من"],
+                answer: 1
+            },
+            {
+                question: "Kalam harus bermakna, maksudnya?",
+                options: [
+                    "Bisa dipahami",
+                    "Berbahasa Arab",
+                    "Ada harakat",
+                    "Ditulis Arab"
+                ],
+                answer: 0
+            },
+            {
+                question: "Kalam terdiri dari?",
+                options: [
+                    "Isim saja",
+                    "Fi'il saja",
+                    "Huruf saja",
+                    "Isim, fi'il, atau huruf"
+                ],
+                answer: 3
+            },
+            {
+                question: "Makna lengkap artinya?",
+                options: [
+                    "Ada subjek dan predikat",
+                    "Bisa dibaca",
+                    "Ada harakat",
+                    "Ditulis Arab"
+                ],
+                answer: 0
+            }
+        ]
+    }
+};
+
+/* =========================
+   QUIZ STATE
+========================= */
+let quizState = {
+    quizId: null,
+    questions: [],
+    currentIndex: 0,
+    answers: []
+};
+
+/* =========================
+   UTIL
+========================= */
+function shuffleArray(arr) {
+    return arr
+        .map(v => ({ v, r: Math.random() }))
+        .sort((a, b) => a.r - b.r)
+        .map(o => o.v);
 }
 
-function userKey(key) {
-    const user = getCurrentUser();
-    return `${user}_${key}`;
-}
-
-/*************************************************
- * 📄 LOAD PDF
- *************************************************/
+/* =========================
+   LOAD PDF
+========================= */
 async function loadPDF(url) {
     container.innerHTML = "";
     container.scrollTop = 0;
@@ -36,6 +115,7 @@ async function loadPDF(url) {
 
         const canvas = document.createElement("canvas");
         const ctx = canvas.getContext("2d");
+
         canvas.width = viewport.width;
         canvas.height = viewport.height;
 
@@ -46,54 +126,97 @@ async function loadPDF(url) {
     container.addEventListener("scroll", checkScroll);
 }
 
-/*************************************************
- * 📚 PROGRESS MATERI
- *************************************************/
+/* =========================
+   CEK SCROLL MATERI
+========================= */
 function checkScroll() {
     if (finished) return;
 
-    const bottom = container.scrollTop + container.clientHeight;
-    const full = container.scrollHeight;
-
-    if (bottom >= full - 5) {
+    if (container.scrollTop + container.clientHeight >= container.scrollHeight - 5) {
         finished = true;
 
         const activeItem = document.querySelector(".sub-item.active");
-        if (!activeItem || !activeItem.dataset.id) return;
-
-        const id = activeItem.dataset.id;
-        markMateriDone(id);
+        if (!activeItem) return;
 
         activeItem.querySelector(".status").textContent = "✔";
+
+        const id = activeItem.dataset.id;
+        let done = JSON.parse(localStorage.getItem("materiDone")) || [];
+
+        if (id && !done.includes(id)) {
+            done.push(id);
+            localStorage.setItem("materiDone", JSON.stringify(done));
+        }
     }
 }
 
-function markMateriDone(id) {
-    let done = JSON.parse(
-        localStorage.getItem(userKey("materiDone"))
-    ) || [];
 
-    if (!done.includes(id)) {
-        done.push(id);
-        localStorage.setItem(
-            userKey("materiDone"),
-            JSON.stringify(done)
-        );
-    }
-}
 
+/* =========================
+   RESTORE CHECKLIST
+========================= */
 function restoreChecklist() {
-    const done = JSON.parse(
-        localStorage.getItem(userKey("materiDone"))
-    ) || [];
+    const done = JSON.parse(localStorage.getItem("materiDone")) || [];
 
     document.querySelectorAll(".sub-item").forEach(item => {
-        const id = item.dataset.id;
-        const status = item.querySelector(".status");
-        if (!status) return;
-
-        status.textContent = done.includes(id) ? "✔" : "✖";
+        const id = item.dataset.id || item.dataset.quiz;
+        if (done.includes(id)) {
+            item.querySelector(".status").textContent = "✔";
+        }
     });
+}
+
+/* =========================
+   TOGGLE SUB ITEM
+========================= */
+window.toggleStatus = function(el) {
+    document.querySelectorAll(".sub-item").forEach(i => i.classList.remove("active"));
+    el.classList.add("active");
+
+    const status = el.querySelector(".status");
+    const title = el.textContent.replace(status.textContent, "").trim();
+    document.getElementById("sub-title").textContent = title;
+
+    container.innerHTML = "";
+    container.removeEventListener("scroll", checkScroll);
+
+    if (el.dataset.pdf) {
+        loadPDF(el.dataset.pdf);
+    } else if (el.dataset.quiz) {
+        startQuiz(el.dataset.quiz);
+    }
+};
+
+/* =========================
+   TOGGLE BAB
+========================= */
+document.querySelectorAll(".toggle").forEach(btn => {
+    btn.addEventListener("click", () => {
+        const list = btn.parentElement.nextElementSibling;
+        list.style.display = list.style.display === "none" ? "block" : "none";
+        btn.textContent = list.style.display === "none" ? "▼" : "▲";
+    });
+});
+
+/* =========================
+   INIT
+========================= */
+document.addEventListener("DOMContentLoaded", () => {
+    restoreChecklist();
+    const initial = document.querySelector(".sub-item.active")?.dataset.pdf;
+    if (initial) loadPDF(initial);
+});
+
+/*************************************************
+ * 🔐 AKUN (LOCAL STORAGE PER USER)
+ *************************************************/
+function getCurrentUser() {
+    return localStorage.getItem("currentUser");
+}
+
+function userKey(key) {
+    const user = getCurrentUser();
+    return `${user}_${key}`;
 }
 
 /*************************************************
@@ -130,9 +253,31 @@ let currentQuiz = null;
 let currentIndex = 0;
 
 /*************************************************
+ * 📦 QUIZ CONTAINER (TIDAK GANGGU PDF)
+ *************************************************/
+function getQuizContainer() {
+    let qc = document.getElementById("quiz-container");
+    if (!qc) {
+        qc = document.createElement("div");
+        qc.id = "quiz-container";
+        qc.style.maxWidth = "600px";
+        qc.style.margin = "40px auto";
+        container.appendChild(qc);
+    }
+    return qc;
+}
+
+function clearQuiz() {
+    const qc = document.getElementById("quiz-container");
+    if (qc) qc.remove();
+}
+
+/*************************************************
  * ▶️ START QUIZ
  *************************************************/
 function startQuiz(quizId) {
+    clearQuiz();
+
     const saved = localStorage.getItem(
         userKey(`quizResult_${quizId}`)
     );
@@ -163,8 +308,9 @@ function renderQuiz(quizId) {
 function showQuestion(index) {
     currentIndex = index;
     const q = currentQuiz.questions[index];
+    const qc = getQuizContainer();
 
-    container.innerHTML = `
+    qc.innerHTML = `
         <div class="quiz-box">
             <h3>Soal ${index + 1} / ${currentQuiz.questions.length}</h3>
             <p>${q.question}</p>
@@ -201,9 +347,7 @@ function submitQuiz() {
     let correct = 0;
 
     currentQuiz.questions.forEach((q, i) => {
-        if (currentQuiz.answers[i] === q.answer) {
-            correct++;
-        }
+        if (currentQuiz.answers[i] === q.answer) correct++;
     });
 
     const score = Math.round(
@@ -226,7 +370,9 @@ function submitQuiz() {
 }
 
 function showQuizResult(quizId, result) {
-    container.innerHTML = `
+    const qc = getQuizContainer();
+
+    qc.innerHTML = `
         <div class="quiz-result">
             <h2>Hasil Quiz</h2>
             <p>Skor: <b>${result.score}%</b></p>
@@ -249,38 +395,3 @@ window.resetQuiz = function (quizId) {
     );
     startQuiz(quizId);
 };
-
-/*************************************************
- * 📌 SIDEBAR CLICK HANDLER
- *************************************************/
-window.toggleStatus = function (el) {
-    document.querySelectorAll(".sub-item").forEach(i =>
-        i.classList.remove("active")
-    );
-    el.classList.add("active");
-
-    const title = document.getElementById("sub-title");
-    if (title) {
-        title.textContent = el.textContent.trim();
-    }
-
-    if (el.dataset.pdf) {
-        loadPDF(el.dataset.pdf);
-    }
-
-    if (el.dataset.quiz) {
-        startQuiz(el.dataset.quiz);
-    }
-};
-
-/*************************************************
- * 🔁 INIT
- *************************************************/
-document.addEventListener("DOMContentLoaded", () => {
-    restoreChecklist();
-
-    const first = document.querySelector(".sub-item.active");
-    if (first && first.dataset.pdf) {
-        loadPDF(first.dataset.pdf);
-    }
-});
