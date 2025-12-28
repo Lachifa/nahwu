@@ -321,6 +321,7 @@ function submitQuiz() {
     }
 }
 
+
 function resetQuiz(quizId) {
     // 1. hapus hasil quiz
     localStorage.removeItem(
