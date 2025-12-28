@@ -165,17 +165,6 @@ if (id && !done.includes(id)) {
     );
 }
 
-        if (id && !done.includes(id)) {
-            done.push(id);
-            localStorage.setItem(
-    userKey("materiDone"),
-    JSON.stringify(done)
-);
-
-        }
-    }
-}
-
 function startQuiz(quizId) {
     const saved = localStorage.getItem(
     userKey(`quizResult_${quizId}`)
@@ -332,14 +321,6 @@ function submitQuiz() {
     }
 }
 
-
-showQuizResult(result);
-
-if (result.passed) {
-    markQuizDone(quizState.quizId);
-}
-
-}
 function resetQuiz(quizId) {
     // 1. hapus hasil quiz
     localStorage.removeItem(
