@@ -226,6 +226,7 @@ function showQuizResult(result) {
 }
 
 
+
 /* =========================
    RENDER 1 QUESTION
 ========================= */
@@ -304,24 +305,32 @@ function submitQuiz() {
         if (quizState.answers[i] === q.answer) correct++;
     });
 
-    const percent = Math.round((correct / quizState.questions.length) * 100);
+    const percent = Math.round(
+        (correct / quizState.questions.length) * 100
+    );
+
+    const passed = percent >= quiz.passPercent;
 
     const result = {
-    quizId: quizState.quizId,
-    correct,
-    total: quizState.questions.length,
-    percent,
-    passed: percent >= quiz.passPercent
-};
-
-localStorage.setItem(
-    userKey(`quizResult_${quizState.quizId}`),
-    JSON.stringify({
+        quizId: quizState.quizId,   // ⬅️ INI PENTING
         correct,
         total: quizState.questions.length,
-        percent
-    })
-);
+        percent,
+        passed
+    };
+
+    // simpan hasil
+    localStorage.setItem(
+        userKey(`quizResult_${quizState.quizId}`),
+        JSON.stringify(result)
+    );
+
+    showQuizResult(result);
+
+    if (passed) {
+        markQuizDone(quizState.quizId);
+    }
+}
 
 
 showQuizResult(result);
