@@ -87,25 +87,23 @@
         }
 
         // 2. Fungsi Otomatis saat Halaman Dibuka
-       window.onload = function () {
-
+       document.addEventListener("DOMContentLoaded", function () {
     const activeUser = localStorage.getItem("namaUser");
 
-    // ⛔ belum login
     if (!activeUser) {
         alert("Eits, kamu belum login!");
         window.location.href = "index.html";
         return;
     }
 
-    // ganti <nama>
+    // update nama
     document.querySelectorAll("h3").forEach(el => {
         if (el.innerText.includes("nama")) {
             el.innerText = activeUser;
         }
     });
 
-    // hitung progress PER AKUN
+    // progress PER AKUN
     const TOTAL_MATERI = 9;
 
     const done = JSON.parse(
@@ -121,7 +119,8 @@
     document.querySelectorAll(".progress-text").forEach(text => {
         text.innerText = percent + " %";
     });
-};
+});
+
 
 
             // CEK KEAMANAN: Kalau belum login, usir balik ke index!
@@ -169,4 +168,5 @@ logoutBtn.addEventListener('click', function (e) {
 </body>
 
 </html>
+
 
