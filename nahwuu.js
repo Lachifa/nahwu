@@ -153,7 +153,17 @@ function checkScroll() {
         activeItem.querySelector(".status").textContent = "✔";
 
         const id = activeItem.dataset.id;
-        let done = JSON.parse(localStorage.getItem("materiDone")) || [];
+        let done = JSON.parse(
+    localStorage.getItem(userKey("materiDone"))
+) || [];
+
+if (id && !done.includes(id)) {
+    done.push(id);
+    localStorage.setItem(
+        userKey("materiDone"),
+        JSON.stringify(done)
+    );
+}
 
         if (id && !done.includes(id)) {
             done.push(id);
@@ -315,11 +325,26 @@ if (result.passed) {
 
 }
 function resetQuiz(quizId) {
+    // hapus hasil quiz
     localStorage.removeItem(
         userKey(`quizResult_${quizId}`)
     );
+
+    // hapus checklist quiz
+    let done = JSON.parse(
+        localStorage.getItem(userKey("materiDone"))
+    ) || [];
+
+    done = done.filter(id => id !== quizId);
+
+    localStorage.setItem(
+        userKey("materiDone"),
+        JSON.stringify(done)
+    );
+
     startQuiz(quizId);
 }
+
 
 
 /* =========================
@@ -329,15 +354,18 @@ function markQuizDone(quizId) {
     const activeItem = document.querySelector(".sub-item.active");
     activeItem.querySelector(".status").textContent = "✔";
 
-    let done = JSON.parse(localStorage.getItem("materiDone")) || [];
-    if (!done.includes(quizId)) {
-        done.push(quizId);
-        localStorage.setItem(
-    userKey("materiDone"),
-    JSON.stringify(done)
-);
+   let done = JSON.parse(
+    localStorage.getItem(userKey("materiDone"))
+) || [];
 
-    }
+if (!done.includes(quizId)) {
+    done.push(quizId);
+    localStorage.setItem(
+        userKey("materiDone"),
+        JSON.stringify(done)
+    );
+}
+
 }
 
 /* =========================
