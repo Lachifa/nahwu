@@ -72,6 +72,12 @@
     </div>
 
     <script>
+
+        function userKey(key) {
+    const user = localStorage.getItem("namaUser");
+    return `${user}_${key}`;
+}
+
         // 1. Fungsi Buka/Tutup Sidebar
         function toggleSidebar() {
             var sidebar = document.getElementById("mySidebar");
@@ -81,24 +87,42 @@
         }
 
         // 2. Fungsi Otomatis saat Halaman Dibuka
-        window.onload = function() {
-            
-            // Ambil data user dari memori
-            const activeUser = localStorage.getItem('namaUser');
-            
-            // Ambil data progress (kalau tidak ada, anggap 0)
-            const TOTAL_MATERI = 9; // 4 nahwu + 5 shorof
-            const done = JSON.parse(localStorage.getItem('materiDone')) || [];
+       window.onload = function () {
 
-            const percent = Math.round((done.length / TOTAL_MATERI) * 100);
+    const activeUser = localStorage.getItem("namaUser");
 
-            document.querySelectorAll('.progress-bar').forEach(bar => {
-                bar.style.width = percent + '%';
-            });
+    // ⛔ belum login
+    if (!activeUser) {
+        alert("Eits, kamu belum login!");
+        window.location.href = "index.html";
+        return;
+    }
 
-            document.querySelectorAll('.progress-text').forEach(text => {
-                text.innerText = percent + ' %';
-            });
+    // ganti <nama>
+    document.querySelectorAll("h3").forEach(el => {
+        if (el.innerText.includes("nama")) {
+            el.innerText = activeUser;
+        }
+    });
+
+    // hitung progress PER AKUN
+    const TOTAL_MATERI = 9;
+
+    const done = JSON.parse(
+        localStorage.getItem(userKey("materiDone"))
+    ) || [];
+
+    const percent = Math.round((done.length / TOTAL_MATERI) * 100);
+
+    document.querySelectorAll(".progress-bar").forEach(bar => {
+        bar.style.width = percent + "%";
+    });
+
+    document.querySelectorAll(".progress-text").forEach(text => {
+        text.innerText = percent + " %";
+    });
+};
+
 
             // CEK KEAMANAN: Kalau belum login, usir balik ke index!
             if (!activeUser) {
@@ -131,13 +155,18 @@
 
         // 3. Fungsi Logout
         const logoutBtn = document.querySelector('.logout-btn');
-        logoutBtn.addEventListener('click', function(e) {
-            e.preventDefault(); // Cegah link pindah langsung
-            localStorage.removeItem('namaUser'); // Hapus sesi
-            window.location.href = 'index.html'; // Pindah ke login
-        });
+logoutBtn.addEventListener('click', function (e) {
+    e.preventDefault();
+
+    // hapus user aktif saja
+    localStorage.removeItem("namaUser");
+
+    window.location.href = "index.html";
+});
+
     </script>
 
 </body>
 
 </html>
+
