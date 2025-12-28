@@ -82,10 +82,16 @@
 /* =========================
    UTIL PER AKUN
 ========================= */
-function userKey(key) {
-    const user = localStorage.getItem("namaUser");
-    return `${user}_${key}`;
+// ===== USER & STORAGE HELPER =====
+function getCurrentUser() {
+    return localStorage.getItem("currentUser");
 }
+
+function userKey(key) {
+    return `${getCurrentUser()}_${key}`;
+}
+
+
 
 /* =========================
    SIDEBAR
@@ -100,53 +106,52 @@ function toggleSidebar() {
 /* =========================
    INIT DASHBOARD
 ========================= */
-document.addEventListener("DOMContentLoaded", function () {
+window.onload = function() {
 
-    localStorage.setItem('currentUser', inputUser);
+    const activeUser = localStorage.getItem("currentUser");
 
-
-    // proteksi halaman
     if (!activeUser) {
         alert("Eits, kamu belum login!");
-        window.location.href = "index.html";
+        window.location.href = 'index.html';
         return;
     }
 
-    // ganti <nama>
-    document.querySelectorAll("h3").forEach(el => {
-        if (el.innerText.includes("nama")) {
-            el.innerText = activeUser;
-        }
-    });
-
-    // progress per akun
     const TOTAL_MATERI = 9;
 
     const done = JSON.parse(
-        localStorage.getItem(userKey("materiDone"))
+        localStorage.getItem(`${activeUser}_materiDone`)
     ) || [];
 
     const percent = Math.round((done.length / TOTAL_MATERI) * 100);
 
-    document.querySelectorAll(".progress-bar").forEach(bar => {
-        bar.style.width = percent + "%";
+    document.querySelectorAll('.progress-bar').forEach(bar => {
+        bar.style.width = percent + '%';
     });
 
-    document.querySelectorAll(".progress-text").forEach(text => {
-        text.innerText = percent + " %";
+    document.querySelectorAll('.progress-text').forEach(text => {
+        text.innerText = percent + ' %';
     });
 
-    // logout
+    // update nama user
+    document.querySelectorAll('h3').forEach(el => {
+        if (el.innerText.includes('<nama>')) {
+            el.innerText = activeUser;
+        }
+    });
+
+    // logout (WAJIB di dalam window.onload)
     const logoutBtn = document.querySelector(".logout-btn");
-    logoutBtn.addEventListener("click", function (e) {
-        e.preventDefault();
-        localStorage.removeItem('currentUser');
-window.location.href = 'index.html';
-
-    });
-});
+    if (logoutBtn) {
+        logoutBtn.addEventListener("click", function (e) {
+            e.preventDefault();
+            localStorage.removeItem('currentUser');
+            window.location.href = 'index.html';
+        });
+    }
+};
 </script>
 
 </body>
 </html>
+
 
