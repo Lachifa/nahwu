@@ -163,19 +163,18 @@ if (id && !done.includes(id)) {
         userKey("materiDone"),
         JSON.stringify(done)
     );
-}
+}}}
 
 function startQuiz(quizId) {
     const saved = localStorage.getItem(
-    userKey(`quizResult_${quizId}`)
-);
+        userKey(`quizResult_${quizId}`)
+    );
 
-if (saved) {
-    const r = JSON.parse(saved);
-    renderQuizResult(r.correct, r.total, r.percent);
-    return;
-}
-
+    if (saved) {
+        const r = JSON.parse(saved);
+        showQuizResult(r);
+        return;
+    }
 
     const quiz = quizData[quizId];
 
@@ -191,6 +190,7 @@ if (saved) {
 
     renderQuizQuestion();
 }
+
 
 function showQuizResult(result) {
     container.innerHTML = `
