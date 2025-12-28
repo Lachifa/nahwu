@@ -102,7 +102,8 @@ function toggleSidebar() {
 ========================= */
 document.addEventListener("DOMContentLoaded", function () {
 
-    const activeUser = localStorage.getItem("namaUser");
+    localStorage.setItem('currentUser', inputUser);
+
 
     // proteksi halaman
     if (!activeUser) {
@@ -139,11 +140,13 @@ document.addEventListener("DOMContentLoaded", function () {
     const logoutBtn = document.querySelector(".logout-btn");
     logoutBtn.addEventListener("click", function (e) {
         e.preventDefault();
-        localStorage.removeItem("namaUser");
-        window.location.href = "index.html";
+        localStorage.removeItem('currentUser');
+window.location.href = 'index.html';
+
     });
 });
 </script>
 
 </body>
 </html>
+
