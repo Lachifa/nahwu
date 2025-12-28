@@ -11,6 +11,18 @@ const container = document.getElementById("pdf-container");
 let finished = false;
 
 /* =========================
+   AKUN & LOCAL STORAGE
+========================= */
+function getCurrentUser() {
+    return localStorage.getItem("currentUser") || "guest";
+}
+
+function userKey(key) {
+    return `${getCurrentUser()}_${key}`;
+}
+
+
+/* =========================
    BANK SOAL QUIZ
 ========================= */
 const quizData = {
@@ -145,18 +157,196 @@ function checkScroll() {
 
         if (id && !done.includes(id)) {
             done.push(id);
-            localStorage.setItem("materiDone", JSON.stringify(done));
+            localStorage.setItem(
+    userKey("materiDone"),
+    JSON.stringify(done)
+);
+
         }
     }
 }
 
+function startQuiz(quizId) {
+    const saved = localStorage.getItem(
+        userKey(`quizResult_${quizId}`)
+    );
 
+    if (saved) {
+        showQuizResult(JSON.parse(saved));
+        return;
+    }
+
+    const quiz = quizData[quizId];
+
+    const selected = shuffleArray([...quiz.questions])
+        .slice(0, quiz.totalQuestions);
+
+    quizState = {
+        quizId,
+        questions: selected,
+        currentIndex: 0,
+        answers: new Array(selected.length).fill(null)
+    };
+
+    renderQuizQuestion();
+}
+
+function showQuizResult(result) {
+    container.innerHTML = `
+        <div class="quiz-wrapper">
+            <div class="quiz-card">
+                <h2>Hasil Quiz</h2>
+                <p>Benar: ${result.correct} / ${result.total}</p>
+                <p>Nilai: <b>${result.percent}%</b></p>
+
+                ${
+                    result.passed
+                        ? `<p style="color:green"><b>LULUS 🎉</b></p>`
+                        : `<p style="color:red"><b>Belum Lulus</b></p>`
+                }
+
+                <button onclick="resetQuiz('${result.quizId}')">
+                    Ulangi Quiz
+                </button>
+            </div>
+        </div>
+    `;
+}
+
+
+/* =========================
+   RENDER 1 QUESTION
+========================= */
+function renderQuizQuestion() {
+    const { questions, currentIndex, answers } = quizState;
+    const q = questions[currentIndex];
+
+    container.innerHTML = `
+        <div class="quiz-wrapper">
+            <div class="quiz-card">
+
+                <p class="quiz-progress">
+                    Soal ${currentIndex + 1} dari ${questions.length}
+                </p>
+
+                <h3>${q.question}</h3>
+
+                <div class="quiz-options">
+                    ${q.options.map((opt, i) => `
+                        <label class="quiz-option">
+                            <input type="radio" name="quiz"
+                                value="${i}"
+                                ${answers[currentIndex] === i ? "checked" : ""}>
+                            ${opt}
+                        </label>
+                    `).join("")}
+                </div>
+
+                <div class="quiz-nav">
+                    ${
+                        currentIndex < questions.length - 1
+                            ? `<button id="nextBtn" disabled>Next</button>`
+                            : `<button id="submitBtn" disabled>Cek Jawaban</button>`
+                    }
+                </div>
+
+            </div>
+        </div>
+    `;
+
+    setupQuizListeners();
+}
+
+/* =========================
+   QUIZ LISTENER
+========================= */
+function setupQuizListeners() {
+    const radios = document.querySelectorAll("input[name='quiz']");
+    const btn = document.getElementById("nextBtn") || document.getElementById("submitBtn");
+
+    radios.forEach(radio => {
+        radio.addEventListener("change", () => {
+            quizState.answers[quizState.currentIndex] = parseInt(radio.value);
+            btn.disabled = false;
+        });
+    });
+
+    if (btn.id === "nextBtn") {
+        btn.onclick = () => {
+            quizState.currentIndex++;
+            renderQuizQuestion();
+        };
+    } else {
+        btn.onclick = submitQuiz;
+    }
+}
+
+/* =========================
+   SUBMIT QUIZ
+========================= */
+function submitQuiz() {
+    const quiz = quizData[quizState.quizId];
+    let correct = 0;
+
+    quizState.questions.forEach((q, i) => {
+        if (quizState.answers[i] === q.answer) correct++;
+    });
+
+    const percent = Math.round((correct / quizState.questions.length) * 100);
+
+    const result = {
+    quizId: quizState.quizId,
+    correct,
+    total: quizState.questions.length,
+    percent,
+    passed: percent >= quiz.passPercent
+};
+
+localStorage.setItem(
+    userKey(`quizResult_${quizState.quizId}`),
+    JSON.stringify(result)
+);
+
+showQuizResult(result);
+
+if (result.passed) {
+    markQuizDone(quizState.quizId);
+}
+
+}
+function resetQuiz(quizId) {
+    localStorage.removeItem(
+        userKey(`quizResult_${quizId}`)
+    );
+    startQuiz(quizId);
+}
+
+
+/* =========================
+   MARK QUIZ DONE
+========================= */
+function markQuizDone(quizId) {
+    const activeItem = document.querySelector(".sub-item.active");
+    activeItem.querySelector(".status").textContent = "✔";
+
+    let done = JSON.parse(localStorage.getItem("materiDone")) || [];
+    if (!done.includes(quizId)) {
+        done.push(quizId);
+        localStorage.setItem(
+    userKey("materiDone"),
+    JSON.stringify(done)
+);
+
+    }
+}
 
 /* =========================
    RESTORE CHECKLIST
 ========================= */
 function restoreChecklist() {
-    const done = JSON.parse(localStorage.getItem("materiDone")) || [];
+    const done = JSON.parse(
+    localStorage.getItem(userKey("materiDone"))
+) || [];
 
     document.querySelectorAll(".sub-item").forEach(item => {
         const id = item.dataset.id || item.dataset.quiz;
@@ -206,192 +396,3 @@ document.addEventListener("DOMContentLoaded", () => {
     const initial = document.querySelector(".sub-item.active")?.dataset.pdf;
     if (initial) loadPDF(initial);
 });
-
-/*************************************************
- * 🔐 AKUN (LOCAL STORAGE PER USER)
- *************************************************/
-function getCurrentUser() {
-    return localStorage.getItem("currentUser");
-}
-
-function userKey(key) {
-    const user = getCurrentUser();
-    return `${user}_${key}`;
-}
-
-/*************************************************
- * 📝 QUIZ BANK
- *************************************************/
-const quizBank = {
-    "quiz-1-2": {
-        questions: [
-            {
-                question: "Apa yang dimaksud kalam?",
-                options: ["Isim", "Ucapan sempurna", "Harf", "Fi'il"],
-                answer: 1
-            },
-            {
-                question: "Syarat kalam adalah?",
-                options: ["Mufid", "Isim", "Harf", "Majhul"],
-                answer: 0
-            },
-            {
-                question: "Minimal kata dalam kalam?",
-                options: ["1", "2", "3", "4"],
-                answer: 1
-            },
-            {
-                question: "Kalam harus?",
-                options: ["Bermakna", "Panjang", "Pendek", "Latin"],
-                answer: 0
-            }
-        ]
-    }
-};
-
-let currentQuiz = null;
-let currentIndex = 0;
-
-/*************************************************
- * 📦 QUIZ CONTAINER (TIDAK GANGGU PDF)
- *************************************************/
-function getQuizContainer() {
-    let qc = document.getElementById("quiz-container");
-    if (!qc) {
-        qc = document.createElement("div");
-        qc.id = "quiz-container";
-        qc.style.maxWidth = "600px";
-        qc.style.margin = "40px auto";
-        container.appendChild(qc);
-    }
-    return qc;
-}
-
-function clearQuiz() {
-    const qc = document.getElementById("quiz-container");
-    if (qc) qc.remove();
-}
-
-/*************************************************
- * ▶️ START QUIZ
- *************************************************/
-function startQuiz(quizId) {
-    clearQuiz();
-
-    const saved = localStorage.getItem(
-        userKey(`quizResult_${quizId}`)
-    );
-
-    if (saved) {
-        showQuizResult(quizId, JSON.parse(saved));
-    } else {
-        renderQuiz(quizId);
-    }
-}
-
-function renderQuiz(quizId) {
-    const quiz = quizBank[quizId];
-
-    const questions = quiz.questions
-        .sort(() => 0.5 - Math.random())
-        .slice(0, 3);
-
-    currentQuiz = {
-        id: quizId,
-        questions,
-        answers: {}
-    };
-
-    showQuestion(0);
-}
-
-function showQuestion(index) {
-    currentIndex = index;
-    const q = currentQuiz.questions[index];
-    const qc = getQuizContainer();
-
-    qc.innerHTML = `
-        <div class="quiz-box">
-            <h3>Soal ${index + 1} / ${currentQuiz.questions.length}</h3>
-            <p>${q.question}</p>
-
-            ${q.options.map((opt, i) => `
-                <label>
-                    <input type="radio" name="q" value="${i}">
-                    ${opt}
-                </label><br>
-            `).join("")}
-
-            <button onclick="nextQuestion()">Lanjut</button>
-        </div>
-    `;
-}
-
-window.nextQuestion = function () {
-    const selected = document.querySelector("input[name='q']:checked");
-    if (!selected) {
-        alert("Pilih jawaban dulu ya 💙");
-        return;
-    }
-
-    currentQuiz.answers[currentIndex] = Number(selected.value);
-
-    if (currentIndex < currentQuiz.questions.length - 1) {
-        showQuestion(currentIndex + 1);
-    } else {
-        submitQuiz();
-    }
-};
-
-function submitQuiz() {
-    let correct = 0;
-
-    currentQuiz.questions.forEach((q, i) => {
-        if (currentQuiz.answers[i] === q.answer) correct++;
-    });
-
-    const score = Math.round(
-        (correct / currentQuiz.questions.length) * 100
-    );
-
-    const result = {
-        score,
-        correct,
-        total: currentQuiz.questions.length,
-        passed: score >= 70
-    };
-
-    localStorage.setItem(
-        userKey(`quizResult_${currentQuiz.id}`),
-        JSON.stringify(result)
-    );
-
-    showQuizResult(currentQuiz.id, result);
-}
-
-function showQuizResult(quizId, result) {
-    const qc = getQuizContainer();
-
-    qc.innerHTML = `
-        <div class="quiz-result">
-            <h2>Hasil Quiz</h2>
-            <p>Skor: <b>${result.score}%</b></p>
-            <p>${result.correct} / ${result.total} benar</p>
-
-            <h3 style="color:${result.passed ? "green" : "red"}">
-                ${result.passed ? "LULUS 🎉" : "BELUM LULUS ❌"}
-            </h3>
-
-            <button onclick="resetQuiz('${quizId}')">
-                🔄 Ulangi Quiz
-            </button>
-        </div>
-    `;
-}
-
-window.resetQuiz = function (quizId) {
-    localStorage.removeItem(
-        userKey(`quizResult_${quizId}`)
-    );
-    startQuiz(quizId);
-};
