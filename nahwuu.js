@@ -178,13 +178,15 @@ if (id && !done.includes(id)) {
 
 function startQuiz(quizId) {
     const saved = localStorage.getItem(
-        userKey(`quizResult_${quizId}`)
-    );
+    userKey(`quizResult_${quizId}`)
+);
 
-    if (saved) {
-        showQuizResult(JSON.parse(saved));
-        return;
-    }
+if (saved) {
+    const r = JSON.parse(saved);
+    renderQuizResult(r.correct, r.total, r.percent);
+    return;
+}
+
 
     const quiz = quizData[quizId];
 
@@ -314,8 +316,13 @@ function submitQuiz() {
 
 localStorage.setItem(
     userKey(`quizResult_${quizState.quizId}`),
-    JSON.stringify(result)
+    JSON.stringify({
+        correct,
+        total: quizState.questions.length,
+        percent
+    })
 );
+
 
 showQuizResult(result);
 
@@ -325,12 +332,12 @@ if (result.passed) {
 
 }
 function resetQuiz(quizId) {
-    // hapus hasil quiz
+    // 1. hapus hasil quiz
     localStorage.removeItem(
         userKey(`quizResult_${quizId}`)
     );
 
-    // hapus checklist quiz
+    // 2. hapus checklist quiz
     let done = JSON.parse(
         localStorage.getItem(userKey("materiDone"))
     ) || [];
@@ -342,6 +349,15 @@ function resetQuiz(quizId) {
         JSON.stringify(done)
     );
 
+    // 3. reset state quiz
+    quizState = {
+        quizId: null,
+        questions: [],
+        currentIndex: 0,
+        answers: []
+    };
+
+    // 4. mulai quiz ulang (acak ulang)
     startQuiz(quizId);
 }
 
