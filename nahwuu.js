@@ -163,16 +163,17 @@ if (id && !done.includes(id)) {
         userKey("materiDone"),
         JSON.stringify(done)
     );
-}}}
+}
+    }
+}
 
-function startQuiz(quizId) {
+window.startQuiz = function (quizId) {
     const saved = localStorage.getItem(
         userKey(`quizResult_${quizId}`)
     );
 
     if (saved) {
-        const r = JSON.parse(saved);
-        showQuizResult(r);
+        showQuizResult(JSON.parse(saved));
         return;
     }
 
@@ -189,7 +190,8 @@ function startQuiz(quizId) {
     };
 
     renderQuizQuestion();
-}
+};
+
 
 
 function showQuizResult(result) {
@@ -322,13 +324,13 @@ function submitQuiz() {
 }
 
 
-function resetQuiz(quizId) {
-    // 1. hapus hasil quiz
+window.resetQuiz = function (quizId) {
+    // hapus hasil quiz
     localStorage.removeItem(
         userKey(`quizResult_${quizId}`)
     );
 
-    // 2. hapus checklist quiz
+    // hapus checklist quiz
     let done = JSON.parse(
         localStorage.getItem(userKey("materiDone"))
     ) || [];
@@ -340,7 +342,7 @@ function resetQuiz(quizId) {
         JSON.stringify(done)
     );
 
-    // 3. reset state quiz
+    // reset state
     quizState = {
         quizId: null,
         questions: [],
@@ -348,9 +350,10 @@ function resetQuiz(quizId) {
         answers: []
     };
 
-    // 4. mulai quiz ulang (acak ulang)
+    // mulai ulang (acak ulang)
     startQuiz(quizId);
-}
+};
+
 
 
 
