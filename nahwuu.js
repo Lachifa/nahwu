@@ -29,7 +29,7 @@ const quizData = {
     "quiz-1-2": {
         title: "Quiz BAB 1 – Kalam",
         totalQuestions: 3,
-        passPercent: 70,
+        passPercent: 50,
         questions: [
             {
                 question: "Apa pengertian kalam menurut ilmu nahwu?",
@@ -293,24 +293,26 @@ function submitQuiz() {
     let correct = 0;
 
     quizState.questions.forEach((q, i) => {
-        if (quizState.answers[i] === q.answer) correct++;
+        if (
+            quizState.answers[i] !== null &&
+            quizState.answers[i] === q.answer
+        ) {
+            correct++;
+        }
     });
 
-    const percent = Math.round(
-        (correct / quizState.questions.length) * 100
-    );
-
+    const total = quizState.questions.length;
+    const percent = Math.round((correct / total) * 100);
     const passed = percent >= quiz.passPercent;
 
     const result = {
-        quizId: quizState.quizId,   // ⬅️ INI PENTING
+        quizId: quizState.quizId,
         correct,
-        total: quizState.questions.length,
+        total,
         percent,
         passed
     };
 
-    // simpan hasil
     localStorage.setItem(
         userKey(`quizResult_${quizState.quizId}`),
         JSON.stringify(result)
@@ -322,6 +324,7 @@ function submitQuiz() {
         markQuizDone(quizState.quizId);
     }
 }
+
 
 
 window.resetQuiz = function (quizId) {
